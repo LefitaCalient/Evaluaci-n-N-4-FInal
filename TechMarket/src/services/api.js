@@ -17,8 +17,6 @@ export async function obtenerProductos() {
 
 }
 
-
-
 export async function buscarProductos(texto) {
 
   const respuesta = await fetch(
@@ -37,9 +35,6 @@ export async function buscarProductos(texto) {
 
 }
 
-
-
-
 export async function obtenerCategorias() {
 
   const respuesta = await fetch(
@@ -55,9 +50,6 @@ export async function obtenerCategorias() {
   return await respuesta.json();
 
 }
-
-
-
 
 export async function productosPorCategoria(categoria) {
 
@@ -75,5 +67,27 @@ export async function productosPorCategoria(categoria) {
 
 
   return datos.products;
+
+}
+
+export async function obtenerProductosPaginados(limit = 10, skip = 0) {
+
+  const respuesta = await fetch(
+    `${URL_BASE}?limit=${limit}&skip=${skip}`
+  );
+
+
+  if (!respuesta.ok) {
+    throw new Error("Error al obtener productos");
+  }
+
+
+  const datos = await respuesta.json();
+
+
+  return {
+    productos: datos.products,
+    total: datos.total
+  };
 
 }

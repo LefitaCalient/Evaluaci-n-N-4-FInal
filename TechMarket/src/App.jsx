@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import ProductCard from "./components/ProductCard";
 import SearchBar from "./components/SearchBar";
-import { obtenerProductos, buscarProductos,obtenerCategorias, productosPorCategoria } from "./services/api";
+import { obtenerProductosPaginados, buscarProductos,obtenerCategorias, productosPorCategoria } from "./services/api";
 import Cart from "./components/Cart";
 import Favorites from "./components/Favorites";
 import CategoryFilther from "./components/CategoryFilther";
+import { sanitizarTexto } from "./utils/security";
 
 function App() {
 
@@ -16,7 +17,18 @@ function App() {
   const [carrito, setCarrito] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
+  const [pagina, setPagina] = useState(0);
+  const [totalProductos, setTotalProductos] = useState(0);
   const [favoritos, setFavoritos] = useState([]);
+  
+  const validarCantidad = (cantidad) => {
+
+  return (
+    Number.isInteger(cantidad) &&
+    cantidad > 0
+  );
+
+};
 
   useEffect(() => {
     cargarProductos();
@@ -30,9 +42,18 @@ useEffect(() => {
       localStorage.getItem("carrito")
     );
 
-    if (Array.isArray(carritoGuardado)) {
-      setCarrito(carritoGuardado);
-    }
+    if (
+  Array.isArray(carritoGuardado) &&
+  carritoGuardado.every(
+    producto =>
+      producto.id &&
+      validarCantidad(producto.cantidad)
+  )
+) {
+  setCarrito(carritoGuardado);
+} else {
+  localStorage.removeItem("carrito");
+}
 
   } catch (error) {
 
@@ -65,14 +86,32 @@ useEffect(() => {
 }, []);
 
 const cargarProductos = async () => {
+
   try {
-    const datos = await obtenerProductos();
-    setProductos(datos);
+
+    const datos = await obtenerProductosPaginados(
+      10,
+      0
+    );
+
+
+    setProductos(datos.productos);
+
+    setTotalProductos(datos.total);
+
+    setPagina(0);
+
+
   } catch (err) {
+
     setError("No fue posible cargar los productos.");
+
   } finally {
+
     setLoading(false);
+
   }
+
 };
 
 const buscar = async () => {
@@ -84,7 +123,9 @@ const buscar = async () => {
   try {
     setLoading(true);
 
-    const datos = await buscarProductos(busqueda);
+    const textoSeguro = sanitizarTexto(busqueda);
+
+    const datos = await buscarProductos(textoSeguro);
 
     setProductos(datos);
 
@@ -95,10 +136,10 @@ const buscar = async () => {
   }
 };
 
-  
-
 const agregarCarrito = (producto) => {
-
+  if (!producto || !producto.id) {
+    return;
+  }
   const existe = carrito.find(
     item => item.id === producto.id
   );
@@ -142,9 +183,9 @@ const agregarCarrito = (producto) => {
 };
 
 const cambiarCantidad = (id, cantidad) => {
-
-  if (cantidad < 1) return;
-
+  if (!validarCantidad(cantidad)) {
+    return;
+  }
 
   const actualizado = carrito.map(producto =>
     producto.id === id
@@ -242,12 +283,77 @@ const cargarCategorias = async () => {
 
 };
 
+const cambiarCategoria = async (categoria) => {
+
+  setCategoriaSeleccionada(categoria);
+
+  try {
+
+    setLoading(true);
+
+
+    if (categoria === "") {
+
+      await cargarProductos();
+
+    } else {
+
+      const datos = await productosPorCategoria(categoria);
+
+      setProductos(datos);
+
+    }
+
+
+  } catch(error) {
+
+    setError("No fue posible cargar la categoría.");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
 
 useEffect(() => {
 
   cargarCategorias();
 
 }, []);
+
+const cargarPagina = async (nuevaPagina) => {
+
+  try {
+
+    setLoading(true);
+
+
+    const datos = await obtenerProductosPaginados(
+      10,
+      nuevaPagina * 10
+    );
+
+
+    setProductos(datos.productos);
+
+    setTotalProductos(datos.total);
+
+    setPagina(nuevaPagina);
+
+
+  } catch(error) {
+
+    setError("No fue posible cargar la página.");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
 
 if (loading) {
     return <h2>Cargando productos...</h2>;
@@ -256,16 +362,22 @@ if (loading) {
   if (error) {
     return <h2>{error}</h2>;
   }
-  
+
   return (
   <div className="container">
 
     <h1>TechMarket</h1>
 
-    <SearchBar
+<SearchBar
   busqueda={busqueda}
   setBusqueda={setBusqueda}
   buscarProductos={buscar}
+/>
+
+<CategoryFilther
+  categorias={categorias}
+  categoriaSeleccionada={categoriaSeleccionada}
+  cambiarCategoria={cambiarCategoria}
 />
 
     <p>Productos encontrados: {productos.length}</p>
@@ -290,6 +402,30 @@ if (loading) {
 
     </div>
 
+    <div>
+
+        <button
+          disabled={pagina === 0}
+          onClick={() => cargarPagina(pagina - 1)}
+        >
+          Anterior
+      </button>
+
+
+        <span>
+          Página {pagina + 1}
+        </span>
+
+
+      <button
+          disabled={(pagina + 1) * 10 >= totalProductos}
+          onClick={() => cargarPagina(pagina + 1)}
+          >
+          Siguiente
+      </button>
+
+    </div>
+
         <Cart
           carrito={carrito}
           cambiarCantidad={cambiarCantidad}
@@ -301,7 +437,6 @@ if (loading) {
     </div>
 );
 }
-
 
 
 export default App;

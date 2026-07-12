@@ -29,23 +29,20 @@ function CategoryFilther({
         {categorias.map((categoria) => (
 
           <option
-            key={categoria}
-            value={categoria}
+            key={categoria.slug}
+            value={categoria.slug}
           >
-            {categoria}
+            {categoria.name}
           </option>
 
         ))}
 
-
       </select>
-
 
     </div>
 
   );
 
-}
+  }
 
-
-export default CategoryFilther;
+  export default CategoryFilther;
