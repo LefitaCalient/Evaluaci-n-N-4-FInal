@@ -23,12 +23,18 @@ function ProductCard({ producto, agregarCarrito, toggleFavorito, esFavorito }) {
       </p>
 
 
-      <button onClick={() => agregarCarrito(producto)}>
+      <button
+        className="cart-button"
+        onClick={() => agregarCarrito(producto)}
+      >
         Agregar al carrito
       </button>
 
 
-      <button onClick={() => toggleFavorito(producto)}>
+      <button
+        className={esFavorito ? "favorite active" : "favorite"}
+        onClick={() => toggleFavorito(producto)}
+      >
         {esFavorito ? "★ Quitar favorito" : "☆ Favorito"}
       </button>
 

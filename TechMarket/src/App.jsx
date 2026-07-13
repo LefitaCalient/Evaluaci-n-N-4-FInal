@@ -366,7 +366,15 @@ if (loading) {
   return (
   <div className="container">
 
-    <h1>TechMarket</h1>
+  <header className="header">
+
+  <h1>TechMarket</h1>
+
+  <p>
+    Catálogo de productos tecnológicos
+  </p>
+
+</header>
 
 <SearchBar
   busqueda={busqueda}
@@ -402,7 +410,7 @@ if (loading) {
 
     </div>
 
-    <div>
+    <div className="pagination">
 
         <button
           disabled={pagina === 0}
