@@ -157,17 +157,14 @@ h2{
   background:#374151;
 }
 
-
 .favorite:hover{
   background:#4b5563;
 }
-
 
 .favorite.active{
   background:#eab308;
   color:#111827;
 }
-
 
 .favorite.active:hover{
   background:#facc15;
@@ -176,7 +173,6 @@ h2{
 .cart-title{
   color:#22c55e;
 }
-
 
 .favorite-title{
   color:#facc15;
