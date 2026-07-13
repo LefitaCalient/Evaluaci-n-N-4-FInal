@@ -97,7 +97,7 @@ select{
 }
 
 h2{
-  margin-top:40px;
+  margin-top:10px;
   margin-bottom:15px;
 }
 
@@ -138,11 +138,13 @@ h2{
 }
 
 .container > p{
-  background:white;
+  background:#1f2937;
+  color:#f9fafb;
   padding:12px;
   border-radius:8px;
   margin-top:20px;
-  box-shadow:0 3px 8px rgba(0,0,0,.05);
+  box-shadow:0 3px 8px rgba(0,0,0,.2);
+  font-weight:bold;
 }
 
 .cart-button{
